@@ -1,28 +1,41 @@
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Upload() {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+  const [file, setFile] = useState(null);
+  const [link, setLink] = useState("");
 
-  useEffect(() => {
-    const { token } = router.query;
-    if (token === "secret123") {
-      setAuthorized(true);
-    } else {
-      router.push("/");
-    }
-  }, [router.query]);
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
 
-  if (!authorized) return <p>Redirecting...</p>;
+  const handleUpload = async () => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+    setLink(data.url);
+  };
 
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
       <h1>Upload Your Document</h1>
-      <input type="file" />
-      <button style={{ padding: "10px 20px", marginLeft: "10px" }}>
+      <input type="file" onChange={handleFileChange} />
+      <button onClick={handleUpload} style={{ padding: "10px 20px", marginLeft: "10px" }}>
         Upload
       </button>
+      {link && (
+        <p>
+          View your document here:{" "}
+          <a href={link} target="_blank" rel="noopener noreferrer">
+            {link}
+          </a>
+        </p>
+      )}
     </div>
   );
 }

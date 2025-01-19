@@ -40,29 +40,23 @@ export default async function handler(req, res) {
       let htmlContent = "";
 
       try {
-        // Convert DOCX
         if (fileExt === ".docx") {
           const result = await mammoth.convertToHtml({ path: filePath });
           htmlContent = result.value;
-
-        // Convert PDF
         } else if (fileExt === ".pdf") {
           const dataBuffer = fs.readFileSync(filePath);
           const data = await pdfParse(dataBuffer);
           htmlContent = `<pre>${data.text}</pre>`;
-
-        // Convert Markdown
         } else if (fileExt === ".md") {
           const md = new MarkdownIt();
           const markdownText = fs.readFileSync(filePath, "utf8");
           htmlContent = md.render(markdownText);
-
         } else {
           res.status(400).json({ error: "Unsupported file type" });
           return;
         }
 
-        // 🌟 Modernized HTML Template 🌟
+        // Google Docs-like Styling Template
         const modernTemplate = `
           <!DOCTYPE html>
           <html lang="en">
@@ -72,24 +66,61 @@ export default async function handler(req, res) {
               <title>${fileName}</title>
               <style>
                   body {
-                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                      background-color: #f9f9f9;
-                      color: #333;
+                      font-family: Arial, sans-serif;
+                      font-size: 18px;
+                      background-color: #f5f5f5;
+                      color: #202124;
                       padding: 40px;
-                      max-width: 800px;
+                      max-width: 900px;
                       margin: auto;
-                      line-height: 1.6;
+                      line-height: 1.8;
+                      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                      border-radius: 8px;
+                      background-color: #fff;
                   }
-                  h1, h2, h3 {
-                      color: #222;
+                  h1 {
+                      font-size: 32px;
+                      font-weight: bold;
+                      margin-bottom: 20px;
+                      color: #1a73e8;
+                  }
+                  h2 {
+                      font-size: 28px;
+                      font-weight: bold;
+                      margin-top: 30px;
+                      color: #1a73e8;
+                  }
+                  h3 {
+                      font-size: 24px;
+                      font-weight: bold;
+                      margin-top: 25px;
+                      color: #1a73e8;
+                  }
+                  p {
+                      margin: 20px 0;
+                  }
+                  ul, ol {
+                      margin: 20px 0;
+                      padding-left: 30px;
                   }
                   a {
-                      color: #0070f3;
+                      color: #1a73e8;
                       text-decoration: none;
+                  }
+                  a:hover {
+                      text-decoration: underline;
                   }
                   img {
                       max-width: 100%;
-                      border-radius: 8px;
+                      border-radius: 5px;
+                  }
+                  blockquote {
+                      border-left: 4px solid #dadce0;
+                      margin: 20px 0;
+                      padding: 10px 20px;
+                      font-style: italic;
+                      color: #555;
+                      background-color: #f8f9fa;
                   }
               </style>
           </head>

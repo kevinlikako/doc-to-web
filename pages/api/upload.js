@@ -14,8 +14,15 @@ export const config = {
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
+    const tempDir = path.join("/tmp", "uploads");
+
+    // Ensure the temporary directory exists
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
     const form = new IncomingForm();
-    form.uploadDir = path.join(process.cwd(), "/public/docs");
+    form.uploadDir = tempDir;
     form.keepExtensions = true;
 
     form.parse(req, async (err, fields, files) => {
@@ -49,15 +56,11 @@ export default async function handler(req, res) {
           return;
         }
 
-        const outputDir = path.join(process.cwd(), "/public/docs");
-        if (!fs.existsSync(outputDir)) {
-          fs.mkdirSync(outputDir, { recursive: true });
-        }
-
-        const outputFilePath = path.join(outputDir, `${fileName}.html`);
+        // Save the converted HTML in the /tmp directory
+        const outputFilePath = path.join(tempDir, `${fileName}.html`);
         fs.writeFileSync(outputFilePath, htmlContent);
 
-        res.status(200).json({ url: `/docs/${fileName}.html` });
+        res.status(200).json({ url: `/api/preview?file=${fileName}.html` });
 
       } catch (conversionError) {
         console.error("Error during file conversion:", conversionError);

@@ -13,7 +13,30 @@ export const config = {
   },
 };
 
-const CLOUDCONVERT_API_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNTYzMzJhYThkNTQ3ZjljZjhjOTQzZDM3NmFkMzA3ZDY2N2UxNjdhMzZmZDBkMGIxYjViYzcyNDc5NmIyZGUwZTM3MTdlZjY4M2FhNTJiYTIiLCJpYXQiOjE3MzczMTI2ODMuNDEzNDUyLCJuYmYiOjE3MzczMTI2ODMuNDEzNDU0LCJleHAiOjQ4OTI5ODYyODMuNDEwMzI2LCJzdWIiOiI3MDc5NDk0NSIsInNjb3BlcyI6WyJ0YXNrLnJlYWQiLCJ0YXNrLndyaXRlIl19.V2gU_rWXaAfcZZ4l0OQ0SrcNDSKQqjHbzBEs_W65_89Y034lGo8GaY9PBpiLJP0-QNvJD8TSdjoomPDFnkCYPoVMWkM2grNtHld-9ZcepNPgfo-0GF9fyC74Z2iAsAiS4mm4NYVZ113e604lTwnuIcGAp1NBGNF4XKIzEN_ZCDavjyqYrx_tlZhaVmX9o-g0_h4CX-QvZ5qIpmulLDBzr0FkF7nfD5FEFD5Hj0KcfPMaj8G1PIWZZHOBAUbCXk171YM36MHtjsyT06MTx9nunVQFt9UIRSh0un3B8pm5bugp34-yjSFCtZOqjgNUV-2F0oW5tid1icfAafUcdjLM23Ktdqqu7TCJaQtrJgd2tKVC-BU6BXOw7A_CLAUFSLTXhA5vLtn6qen2pjFFgIhrbG4HHIhbJjRFWldK1oCMtz7P6I9cP7tjOXFwDegmAiD0J3gNo4PBYcEUVvTU7cs_IrusPNmlcK1oMLsjqsM0oPMxebEwJ77owAHdhpLf1tW0I9JU7uK6Rl9ZFDeCk3Y2NYpT5tnc6oSJdXZuVn87oJL46LCzP6gzNPuQb99g2BsEN7AKU-2tsol_VUlf3-DmBvgUiN6jPwIRkj2rDCGs717A4wfmfzi8uDOtcFb_dK0uxX3uF4MuX5Bi1qNQwOm__5Z-N9rNebCis8bfYN3JzWk"; // Add your CloudConvert API key
+const CLOUDCONVERT_API_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNTYzMzJhYThkNTQ3ZjljZjhjOTQzZDM3NmFkMzA3ZDY2N2UxNjdhMzZmZDBkMGIxYjViYzcyNDc5NmIyZGUwZTM3MTdlZjY4M2FhNTJiYTIiLCJpYXQiOjE3MzczMTI2ODMuNDEzNDUyLCJuYmYiOjE3MzczMTI2ODMuNDEzNDU0LCJleHAiOjQ4OTI5ODYyODMuNDEwMzI2LCJzdWIiOiI3MDc5NDk0NSIsInNjb3BlcyI6WyJ0YXNrLnJlYWQiLCJ0YXNrLndyaXRlIl19.V2gU_rWXaAfcZZ4l0OQ0SrcNDSKQqjHbzBEs_W65_89Y034lGo8GaY9PBpiLJP0-QNvJD8TSdjoomPDFnkCYPoVMWkM2grNtHld-9ZcepNPgfo-0GF9fyC74Z2iAsAiS4mm4NYVZ113e604lTwnuIcGAp1NBGNF4XKIzEN_ZCDavjyqYrx_tlZhaVmX9o-g0_h4CX-QvZ5qIpmulLDBzr0FkF7nfD5FEFD5Hj0KcfPMaj8G1PIWZZHOBAUbCXk171YM36MHtjsyT06MTx9nunVQFt9UIRSh0un3B8pm5bugp34-yjSFCtZOqjgNUV-2F0oW5tid1icfAafUcdjLM23Ktdqqu7TCJaQtrJgd2tKVC-BU6BXOw7A_CLAUFSLTXhA5vLtn6qen2pjFFgIhrbG4HHIhbJjRFWldK1oCMtz7P6I9cP7tjOXFwDegmAiD0J3gNo4PBYcEUVvTU7cs_IrusPNmlcK1oMLsjqsM0oPMxebEwJ77owAHdhpLf1tW0I9JU7uK6Rl9ZFDeCk3Y2NYpT5tnc6oSJdXZuVn87oJL46LCzP6gzNPuQb99g2BsEN7AKU-2tsol_VUlf3-DmBvgUiN6jPwIRkj2rDCGs717A4wfmfzi8uDOtcFb_dK0uxX3uF4MuX5Bi1qNQwOm__5Z-N9rNebCis8bfYN3JzWk".trim(); // Add your CloudConvert API key
+
+const cloudConvertInstance = new cloudconvert(CLOUDCONVERT_API_KEY.trim());
+
+const job = await cloudConvertInstance.jobs.create({
+  tasks: {
+    import: {
+      operation: "import/upload",
+    },
+    convert: {
+      operation: "convert",
+      input: "import",
+      output_format: "html",
+    },
+    export: {
+      operation: "export/url",
+      input: "convert",
+    },
+  },
+}, {
+  headers: {
+    Authorization: `Bearer ${CLOUDCONVERT_API_KEY.trim()}`,
+  },
+});
 
 export default async function handler(req, res) {
   if (req.method === "POST") {

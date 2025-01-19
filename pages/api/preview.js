@@ -3,7 +3,7 @@ import path from "path";
 
 export default function handler(req, res) {
   const { file } = req.query;
-  const filePath = path.join("/tmp/uploads", file);
+  const filePath = path.join("/tmp", file);
 
   if (fs.existsSync(filePath)) {
     const fileContent = fs.readFileSync(filePath, "utf8");

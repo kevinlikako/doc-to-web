@@ -1,4 +1,4 @@
-import formidable from "formidable";
+import { IncomingForm } from "formidable";
 import fs from "fs";
 import path from "path";
 import mammoth from "mammoth";
@@ -14,7 +14,7 @@ export const config = {
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    const form = new formidable.IncomingForm();
+    const form = new IncomingForm();
     form.uploadDir = path.join(process.cwd(), "/public/docs");
     form.keepExtensions = true;
 

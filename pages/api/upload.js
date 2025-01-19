@@ -40,19 +40,44 @@ export default async function handler(req, res) {
       let htmlContent = "";
 
       try {
+        // Handle DOCX files
         if (fileExt === ".docx") {
-          const result = await mammoth.convertToHtml({ path: filePath });
-          htmlContent = result.value;
+          try {
+            const result = await mammoth.convertToHtml({ path: filePath });
+            htmlContent = result.value;
+          } catch (docxError) {
+            console.error("DOCX conversion error:", docxError);
+            res.status(400).json({ error: "Failed to process DOCX. Please upload a valid DOCX file." });
+            return;
+          }
+
+        // Handle PDF files with error handling
         } else if (fileExt === ".pdf") {
-          const dataBuffer = fs.readFileSync(filePath);
-          const data = await pdfParse(dataBuffer);
-          htmlContent = `<pre>${data.text}</pre>`;
+          try {
+            const dataBuffer = fs.readFileSync(filePath);
+            const data = await pdfParse(dataBuffer);
+            htmlContent = `<pre>${data.text}</pre>`;
+          } catch (pdfError) {
+            console.error("PDF conversion error:", pdfError);
+            res.status(400).json({ error: "Failed to process PDF. Please upload a valid PDF file." });
+            return;
+          }
+
+        // Handle Markdown files
         } else if (fileExt === ".md") {
-          const md = new MarkdownIt();
-          const markdownText = fs.readFileSync(filePath, "utf8");
-          htmlContent = md.render(markdownText);
+          try {
+            const md = new MarkdownIt();
+            const markdownText = fs.readFileSync(filePath, "utf8");
+            htmlContent = md.render(markdownText);
+          } catch (mdError) {
+            console.error("Markdown conversion error:", mdError);
+            res.status(400).json({ error: "Failed to process Markdown. Please upload a valid .md file." });
+            return;
+          }
+
+        // Unsupported file types
         } else {
-          res.status(400).json({ error: "Unsupported file type" });
+          res.status(400).json({ error: "Unsupported file type. Please upload a PDF, DOCX, or Markdown file." });
           return;
         }
 
@@ -64,9 +89,10 @@ export default async function handler(req, res) {
 
       } catch (conversionError) {
         console.error("Error during file conversion:", conversionError);
-        res.status(500).json({ error: "Conversion failed" });
+        res.status(500).json({ error: "Conversion failed. Please try again." });
       }
     });
+
   } else {
     res.status(405).json({ error: "Method not allowed" });
   }

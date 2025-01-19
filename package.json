@@ -9,12 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "child_process": "^1.0.2",
     "cloudconvert": "^2.3.7",
     "formidable": "^3.5.2",
+    "fs": "^0.0.1-security",
     "jsdom": "^26.0.0",
     "mammoth": "^1.9.0",
     "markdown-it": "^14.1.0",
     "next": "15.1.5",
+    "path": "^0.12.7",
     "pdf-parse": "^1.1.1",
     "pdf2html": "^3.1.0",
     "react": "^19.0.0",

@@ -10,7 +10,6 @@ export default function Upload() {
     const selectedFile = e.target.files[0];
     const allowedTypes = [".pdf", ".docx", ".md"];
 
-    // Check if the file type is allowed
     if (selectedFile) {
       const fileExt = selectedFile.name.substring(selectedFile.name.lastIndexOf(".")).toLowerCase();
       if (!allowedTypes.includes(fileExt)) {
@@ -33,61 +32,73 @@ export default function Upload() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const xhr = new XMLHttpRequest();
-
-    xhr.upload.addEventListener("progress", (e) => {
-      if (e.lengthComputable) {
-        const percentComplete = Math.round((e.loaded / e.total) * 100);
-        setProgress(percentComplete);
-      }
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
     });
 
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === XMLHttpRequest.DONE) {
-        setUploading(false);
-        if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText);
-          setLink(response.url);
-        } else {
-          alert("Upload failed. Please try again.");
-        }
-      }
-    };
+    const data = await response.json();
+    setUploading(false);
 
-    xhr.open("POST", "/api/upload");
-    xhr.send(formData);
+    if (response.ok) {
+      setLink(data.url);
+    } else {
+      alert("Upload failed. Please try again.");
+    }
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "100px" }}>
-      <h1>Upload Your Document</h1>
-      <p>Accepted file types: <strong>PDF (.pdf), Word Document (.docx), Markdown (.md)</strong></p>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      backgroundColor: '#f4f6f8',
+      fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+    }}>
+      <h1 style={{ fontSize: '2.5rem', color: '#333' }}>Upload Your Document</h1>
+      <p style={{ color: '#555' }}>Accepted file types: <strong>PDF (.pdf), DOCX (.docx), Markdown (.md)</strong></p>
 
-      <input type="file" onChange={handleFileChange} />
-
-      <button
+      <input 
+        type="file" 
+        onChange={handleFileChange} 
+        style={{ margin: '20px 0' }} 
+      />
+      <button 
         onClick={handleUpload}
-        style={{ padding: "10px 20px", marginLeft: "10px", cursor: uploading ? "not-allowed" : "pointer" }}
         disabled={uploading}
-      >
+        style={{
+          padding: '12px 25px',
+          backgroundColor: uploading ? '#ccc' : '#0070f3',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: uploading ? 'not-allowed' : 'pointer'
+        }}>
         {uploading ? "Uploading..." : "Upload"}
       </button>
 
       {uploading && (
-        <div style={{ width: "50%", margin: "20px auto", border: "1px solid #ccc", borderRadius: "5px" }}>
-          <div
-            style={{
-              width: `${progress}%`,
-              height: "20px",
-              backgroundColor: "#4caf50",
-              transition: "width 0.3s ease-in-out",
-            }}
-          ></div>
+        <div style={{
+          width: '300px',
+          height: '10px',
+          backgroundColor: '#e0e0e0',
+          marginTop: '20px',
+          borderRadius: '5px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            width: `${progress}%`,
+            height: '100%',
+            backgroundColor: '#0070f3',
+            transition: 'width 0.3s ease'
+          }}></div>
         </div>
       )}
 
       {link && (
-        <p>
+        <p style={{ marginTop: '20px', color: '#0070f3' }}>
           🎉 Your document is ready! View it here:{" "}
           <a href={link} target="_blank" rel="noopener noreferrer">
             {link}
@@ -97,3 +108,8 @@ export default function Upload() {
     </div>
   );
 }
+
+form.parse(req, (err, fields, files) => {
+    console.log("Received fields:", fields);
+    console.log("Received files:", files);
+  });

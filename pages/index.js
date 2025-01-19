@@ -12,7 +12,8 @@ export default function Home() {
   };
 
   const handleUpload = async (e) => {
-    e.preventDefault();  // Ensure form submission does not reload the page
+    e.preventDefault();
+
     if (!file) {
       alert("Please select a file first.");
       return;
@@ -23,23 +24,18 @@ export default function Home() {
 
     setUploading(true);
 
-    try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-      const data = await response.json();
-      setUploading(false);
+    const data = await response.json();
+    setUploading(false);
 
-      if (response.ok) {
-        setLink(data.url);
-      } else {
-        alert("Upload failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      alert("Something went wrong. Please try again.");
+    if (response.ok) {
+      setLink(data.url);
+    } else {
+      alert("Upload failed. Please try again.");
     }
   };
 
@@ -55,7 +51,7 @@ export default function Home() {
       padding: '40px'
     }}>
       <h1 style={{ fontSize: '2.5rem', color: '#333' }}>Upload Your Document</h1>
-      <p style={{ fontSize: '1.2rem', color: '#555' }}>Supported file types: PDF, DOCX, MD</p>
+      <p style={{ fontSize: '1.2rem', color: '#555' }}>Supported file types: PDF, DOCX</p>
 
       <form onSubmit={handleUpload} encType="multipart/form-data" style={{ textAlign: 'center' }}>
         <input type="file" onChange={handleFileChange} required />

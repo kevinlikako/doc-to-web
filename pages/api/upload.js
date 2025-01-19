@@ -40,50 +40,68 @@ export default async function handler(req, res) {
       let htmlContent = "";
 
       try {
-        // Handle DOCX files
+        // Convert DOCX
         if (fileExt === ".docx") {
-          try {
-            const result = await mammoth.convertToHtml({ path: filePath });
-            htmlContent = result.value;
-          } catch (docxError) {
-            console.error("DOCX conversion error:", docxError);
-            res.status(400).json({ error: "Failed to process DOCX. Please upload a valid DOCX file." });
-            return;
-          }
+          const result = await mammoth.convertToHtml({ path: filePath });
+          htmlContent = result.value;
 
-        // Handle PDF files with error handling
+        // Convert PDF
         } else if (fileExt === ".pdf") {
-          try {
-            const dataBuffer = fs.readFileSync(filePath);
-            const data = await pdfParse(dataBuffer);
-            htmlContent = `<pre>${data.text}</pre>`;
-          } catch (pdfError) {
-            console.error("PDF conversion error:", pdfError);
-            res.status(400).json({ error: "Failed to process PDF. Please upload a valid PDF file." });
-            return;
-          }
+          const dataBuffer = fs.readFileSync(filePath);
+          const data = await pdfParse(dataBuffer);
+          htmlContent = `<pre>${data.text}</pre>`;
 
-        // Handle Markdown files
+        // Convert Markdown
         } else if (fileExt === ".md") {
-          try {
-            const md = new MarkdownIt();
-            const markdownText = fs.readFileSync(filePath, "utf8");
-            htmlContent = md.render(markdownText);
-          } catch (mdError) {
-            console.error("Markdown conversion error:", mdError);
-            res.status(400).json({ error: "Failed to process Markdown. Please upload a valid .md file." });
-            return;
-          }
+          const md = new MarkdownIt();
+          const markdownText = fs.readFileSync(filePath, "utf8");
+          htmlContent = md.render(markdownText);
 
-        // Unsupported file types
         } else {
-          res.status(400).json({ error: "Unsupported file type. Please upload a PDF, DOCX, or Markdown file." });
+          res.status(400).json({ error: "Unsupported file type" });
           return;
         }
 
-        // Save the converted HTML in the /tmp directory
+        // 🌟 Modernized HTML Template 🌟
+        const modernTemplate = `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>${fileName}</title>
+              <style>
+                  body {
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                      background-color: #f9f9f9;
+                      color: #333;
+                      padding: 40px;
+                      max-width: 800px;
+                      margin: auto;
+                      line-height: 1.6;
+                  }
+                  h1, h2, h3 {
+                      color: #222;
+                  }
+                  a {
+                      color: #0070f3;
+                      text-decoration: none;
+                  }
+                  img {
+                      max-width: 100%;
+                      border-radius: 8px;
+                  }
+              </style>
+          </head>
+          <body>
+              ${htmlContent}
+          </body>
+          </html>
+        `;
+
+        // Save the styled HTML
         const outputFilePath = path.join(tempDir, `${fileName}.html`);
-        fs.writeFileSync(outputFilePath, htmlContent);
+        fs.writeFileSync(outputFilePath, modernTemplate);
 
         res.status(200).json({ url: `/api/preview?file=${fileName}.html` });
 

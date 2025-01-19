@@ -4,46 +4,42 @@ export default function Home() {
   const [file, setFile] = useState(null);
   const [link, setLink] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    const allowedTypes = [".pdf", ".docx", ".md"];
-
-    if (selectedFile) {
-      const fileExt = selectedFile.name.substring(selectedFile.name.lastIndexOf(".")).toLowerCase();
-      if (!allowedTypes.includes(fileExt)) {
-        alert("Invalid file type. Please upload a PDF, DOCX, or Markdown (.md) file.");
-        return;
-      }
-      setFile(selectedFile);
+    if (e.target.files.length > 0) {
+      setFile(e.target.files[0]);
     }
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (e) => {
+    e.preventDefault();  // Ensure form submission does not reload the page
     if (!file) {
-      alert("Please select a valid file to upload.");
+      alert("Please select a file first.");
       return;
     }
-
-    setUploading(true);
-    setProgress(0);
 
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    setUploading(true);
 
-    const data = await response.json();
-    setUploading(false);
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    if (response.ok) {
-      setLink(data.url);
-    } else {
-      alert("Upload failed. Please try again.");
+      const data = await response.json();
+      setUploading(false);
+
+      if (response.ok) {
+        setLink(data.url);
+      } else {
+        alert("Upload failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Something went wrong. Please try again.");
     }
   };
 
@@ -54,49 +50,27 @@ export default function Home() {
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: '100vh',
-      backgroundColor: '#f4f6f8',
       fontFamily: 'Arial, sans-serif',
-      fontSize: '18px'
+      backgroundColor: '#f5f5f5',
+      padding: '40px'
     }}>
       <h1 style={{ fontSize: '2.5rem', color: '#333' }}>Upload Your Document</h1>
-      <p style={{ color: '#555' }}>Accepted file types: <strong>PDF (.pdf), DOCX (.docx), Markdown (.md)</strong></p>
+      <p style={{ fontSize: '1.2rem', color: '#555' }}>Supported file types: PDF, DOCX, MD</p>
 
-      <input 
-        type="file" 
-        onChange={handleFileChange} 
-        style={{ margin: '20px 0' }} 
-      />
-      <button 
-        onClick={handleUpload}
-        disabled={uploading}
-        style={{
-          padding: '12px 25px',
-          backgroundColor: uploading ? '#ccc' : '#0070f3',
+      <form onSubmit={handleUpload} encType="multipart/form-data" style={{ textAlign: 'center' }}>
+        <input type="file" onChange={handleFileChange} required />
+        <button type="submit" style={{
+          padding: '10px 20px',
+          marginLeft: '10px',
+          backgroundColor: '#0070f3',
           color: '#fff',
           border: 'none',
-          borderRadius: '8px',
-          cursor: uploading ? 'not-allowed' : 'pointer'
-        }}>
-        {uploading ? "Uploading..." : "Upload"}
-      </button>
-
-      {uploading && (
-        <div style={{
-          width: '300px',
-          height: '10px',
-          backgroundColor: '#e0e0e0',
-          marginTop: '20px',
           borderRadius: '5px',
-          overflow: 'hidden'
+          cursor: 'pointer',
         }}>
-          <div style={{
-            width: `${progress}%`,
-            height: '100%',
-            backgroundColor: '#0070f3',
-            transition: 'width 0.3s ease'
-          }}></div>
-        </div>
-      )}
+          {uploading ? "Uploading..." : "Upload"}
+        </button>
+      </form>
 
       {link && (
         <p style={{ marginTop: '20px', color: '#0070f3' }}>
